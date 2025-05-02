@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+    - ./:/var/www
+    - ./_docker/nginx/conf.d:/etc/nginx/conf.d
+    ports:
+    - "8876:80"
+    depends_on:
+    - app
+    container_name: project_nginx
+    command: /bin/sh -c "chown -R www-data:www-data /var/www && chmod -R 755 /var/www && nginx -g 'daemon off;'"
+
+
+  app:
+    build:
+      context: .
+      dockerfile: _docker/app/Dockerfile
+    volumes:
+    - ./:/var/www
+    depends_on:
+    - db
+    command: ["sh", "entrypoint.sh"]
+    container_name: project_app
+
+  db:
+    image: mysql:8.0
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: lardocker
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8101:3306"
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    container_name: project_db
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - db
+    container_name: project_phpmyadmin
+    
+volumes:
+  db_data:
