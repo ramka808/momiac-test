@@ -1,6 +1,6 @@
 
   ```
-  docker-compose up -d
+  docker compose up -d
   ```
 Подождать пока устновятся пакеты
 ## Кореной url: http://localhost:8876
